@@ -1,26 +1,26 @@
-# ---------------------------------------------------------------------------- 
+# ----------------------------------------------------------------------------
 #   About this file
-# ---------------------------------------------------------------------------- 
+# ----------------------------------------------------------------------------
 
 This file contains information about the price DAT files. These files contain
-fixed-width data for the following columns: 
+fixed-width data for the following columns:
 
-  - 'Low': The lowest price at which the stock trades for the day, 
+  - 'Low': The lowest price at which the stock trades for the day,
             unadjusted for dividends, splits, and other events.
 
-  - 'Adj Close': The closing price of the stock, adjusted for dividends, 
+  - 'Adj Close': The closing price of the stock, adjusted for dividends,
             splits, and other events.
 
   - 'Volume': The total number of shares traded on the day (in millions)
 
-  - 'Date': The calendar day of this data. Each date is represented as 
-            a four-digit year, a two-digit month, and a two-digit day 
+  - 'Date': The calendar day of this data. Each date is represented as
+            a four-digit year, a two-digit month, and a two-digit day
             separated by commas. This is YYYY-MM-DD format.
 
-  - 'Open': The inital price at which the stock trades for the day, 
+  - 'Open': The inital price at which the stock trades for the day,
             unadjusted for dividends, splits, and other events.
 
-  - 'Close': The closing price at which the stock trades on the day, 
+  - 'Close': The closing price at which the stock trades on the day,
             unadjusted for dividends, splits, and other events.
 
 
@@ -49,17 +49,17 @@ character in the line.
 For your specific DAT files, you have the following information:
 
 Column Name:
-    column position : The order of this column in the file starting with 1. 
-                      That is, the first column has column position 1, the 
-                      second column has column position 2, and so on. 
+    column position : The order of this column in the file starting with 1.
+                      That is, the first column has column position 1, the
+                      second column has column position 2, and so on.
 
     dtype :           The Pandas data type for this column
 
     width :           The number of characters in this column
 
-# ---------------------------------------------------------------------------- 
+# ----------------------------------------------------------------------------
 #   Column information
-# ---------------------------------------------------------------------------- 
+# ----------------------------------------------------------------------------
 
 Low:
   column position: 1
@@ -90,5 +90,3 @@ Close:
   column position: 6
   dtype: float64
   width: 10
-
-
