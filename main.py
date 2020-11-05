@@ -3,8 +3,8 @@
 Complete the sections below marked with '<COMPLETE THIS PART>'
 
 """
-import os
 import datetime as dt
+import os.path
 
 import numpy as np
 import pandas as pd
@@ -14,13 +14,13 @@ import pandas as pd
 # - `<tic>_rec.csv`
 # - ff_daily.csv`
 
-SRCDIR = os.path.abspath('/Users/David Lui/Documents/Uni Lyf/Term 3 2020/FINS3646/z5160840/z5160840/data')
+SRCDIR = "data"
 
 # TICKERS is the location of the TICKERS.txt file
-TICKERS = os.path.abspath('/Users/David Lui/Documents/Uni Lyf/Term 3 2020/FINS3646/z5160840/z5160840/TICKERS.txt')
+TICKERS = "TICKERS.txt"
 
 # FF_CSV is the location of the ff_daily.csv  file
-FF_CSV = os.path.abspath('/Users/David Lui/Documents/Uni Lyf/Term 3 2020/FINS3646/z5160840/z5160840/ff_daily.csv')
+FF_CSV = 'data/ff_daily.csv'
 
 # ----------------------------------------------------------------------------
 #   Modify these variables as specified by the README.txt file
@@ -31,15 +31,21 @@ FF_CSV = os.path.abspath('/Users/David Lui/Documents/Uni Lyf/Term 3 2020/FINS364
 # - The order of the elements must match the order of the columns specified
 #   in the README.txt file.
 #
-SRC_COLS = ['Low', 'Adj Close', 'Volume', 'Date', 'Open', 'Close']
+SRC_COLS = ['low', 'adjClose', 'volume', 'date', 'open', 'close']
 
 # NOTE:
 # - SRC_COL_DTYPES must be a dict
 # - The keys should be the column names, the values should be their dtype, as
 #   specified in the README.txt file.
 #
-SRC_COL_DTYPES = dict(low="float64", adjClose="float64", volume='int64', date='datetime64', open='float64',
-                      close='float64')
+SRC_COL_DTYPES = {
+    "low": "float64",
+    "adjClose": "float64",
+    "volume": "int64",
+    "date": "datetime64",
+    "open": "float64",
+    "close": "float64"
+}
 
 # NOTE:
 # - SRC_COL_WIDTHS should be a dict
@@ -47,12 +53,20 @@ SRC_COL_DTYPES = dict(low="float64", adjClose="float64", volume='int64', date='d
 #   that field in the DAT file. These should match the widths defined in the
 #   README.txt file.
 #
-SRC_COL_WIDTHS = dict(low=16, adjClose=14, volume=9, date=11, open=12, close=10)
-
+SRC_COL_WIDTHS = {
+    "low": 16,
+    "adjClose": 14,
+    "volume": 9,
+    "date": 11,
+    "open": 12,
+    "close": 10
+}
 
 # ----------------------------------------------------------------------------
 #   Function get_tics
 # ----------------------------------------------------------------------------
+
+
 def get_tics(pth):
     """ Reads a file with tickers (one per line) and returns a list
     of formatted tickers (see the notes below).
@@ -74,9 +88,7 @@ def get_tics(pth):
         - There are no spaces
         - The list contains no empty/blank tickers
     """
-    # <COMPLETE THIS PART>
-    file = open(pth, "r")
-    return (file.read().lower().strip())
+    return (open(pth).read().strip().split("\n"))
 
 
 # ----------------------------------------------------------------------------
@@ -89,7 +101,6 @@ def dat_to_df(pth,
               ):
     """ This function creates a dataframe with the contents of a DAT file
     containing stock price information for a given ticker.
-
 
     Parameters
     ----------
@@ -131,11 +142,48 @@ def dat_to_df(pth,
           file.
 
     """
-    # <COMPLETE THIS PART>
-    # loads the price data and sets the date as index
-    df = pd.read_csv(pth)
-    dateColumn = src_cols.pop[3]
-    df.columns = [src_cols]
+
+    # Read the file
+    dat_file_rows = open(pth).read().strip().split("\n")
+
+    # An array of string arrays with each string being row column data
+    parsed_dat_file = []
+    # Array of data strings from dat file
+    parsed_dates_index = []
+    # An index for all of the column lables used in the internal parsed_dat_file array
+    parsed_dat_columns = set([])
+
+    # Loop through every row in the dat file and parse out the columns in the row
+    for row in dat_file_rows:
+        # Create some arrays to track the current rows state while looping through the columns
+        current_row = row
+        current_parsed_data = []
+
+        # Loop through the src_cols array to get the correct column order and parse out the width
+        for col in src_cols:
+            # Get the width of the current column being looped over
+            col_width = src_col_widths[col]
+            # Slice the current column from 0 to the current column width
+            col_data = current_row[:col_width]
+            # Remove the prefix of the string from 0 to the current column width
+            # so that the next column width is index from the correct postion
+            current_row = current_row[col_width:]
+
+            if col is "date":
+                # We want to track the dates in the date index so we can use it as the index for our data frame
+                parsed_dates_index.append(col_data)
+            else:
+                # Any other columns can be added to the current rows array of strings representing the columns in the row
+                current_parsed_data.append(col_data)
+                # Append the current column label to the parsed_dat_columns index so we have an index for the current_parsed_data
+                # columns which would not match src_cols array
+                parsed_dat_columns.add(col)
+
+        # Once all columns have been parsed from the dat file add them to the array of string arrays representing the whole dat file
+        parsed_dat_file.append(current_parsed_data)
+
+    return pd.DataFrame(
+        parsed_dat_file, pd.DatetimeIndex(parsed_dates_index), parsed_dat_columns)
 
 
 # ----------------------------------------------------------------------------
@@ -215,8 +263,16 @@ def mk_prc_df(
         2020-10-09  116.970001 ... 434.000000
 
     """
-    # <COMPLETE THIS PART>
 
+    # Empty date index to union with the created data frame data indexes
+    date_index = pd.Index([])
+    adj_close_prices = []
+    max_rows = 0
+    for ticker in tickers:
+        # Read the data file for the ticker and generate a data frame for it
+        dat_file_path = os.path.join(srcdir, ticker + '_prc.dat').lower()
+        result_df = dat_to_df(dat_file_path, src_cols,
+                              src_col_dtypes, src_col_widths)
 
 # ----------------------------------------------------------------------------
 #   Function mk_aret_df
@@ -634,7 +690,8 @@ def mk_ret_dates_by_group(group):
     # --------------------------------------------------------
     # Leave this here
     # --------------------------------------------------------
-    cols = ['event_id', 'firm', 'event_date', 'event_time', 'ret_date', 'event_type']
+    cols = ['event_id', 'firm', 'event_date',
+            'event_time', 'ret_date', 'event_type']
 
     # --------------------------------------------------------
     # Create the event date col
@@ -816,7 +873,6 @@ def main():
     correct order.
 
     """
-
     # --------------------------------------------------------
     #   Get the tickers
     # --------------------------------------------------------
@@ -857,7 +913,9 @@ def main():
     #   Calculate the average CAR by event_type
     # --------------------------------------------------------
     cars_by_etype = cars.groupby(['event_type'])[['car']].mean()
-# print(cars_by_etype)
+    # print(cars_by_etype)
 
 
-
+# Doing this so it is run when running with the following syntax
+if __name__ == "__main__":
+    main()
