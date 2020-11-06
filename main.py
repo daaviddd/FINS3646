@@ -62,6 +62,7 @@ SRC_COL_WIDTHS = {
     "close": 10
 }
 
+
 # ----------------------------------------------------------------------------
 #   Function get_tics
 # ----------------------------------------------------------------------------
@@ -169,7 +170,7 @@ def dat_to_df(pth,
             # so that the next column width is index from the correct postion
             current_row = current_row[col_width:]
 
-            if col is "date":
+            if col == "date":
                 # We want to track the dates in the date index so we can use it as the index for our data frame
                 parsed_dates_index.append(col_data)
             else:
@@ -182,8 +183,9 @@ def dat_to_df(pth,
         # Once all columns have been parsed from the dat file add them to the array of string arrays representing the whole dat file
         parsed_dat_file.append(current_parsed_data)
 
-    return pd.DataFrame(
-        parsed_dat_file, pd.DatetimeIndex(parsed_dates_index), parsed_dat_columns)
+    df = pd.DataFrame(parsed_dat_file, pd.DatetimeIndex(parsed_dates_index), parsed_dat_columns)
+    df.sort_index(inplace=True)
+    print(dat_file_rows)
 
 
 # ----------------------------------------------------------------------------
@@ -265,14 +267,33 @@ def mk_prc_df(
     """
 
     # Empty date index to union with the created data frame data indexes
-    date_index = pd.Index([])
-    adj_close_prices = []
-    max_rows = 0
+
+    adj_close_ticker = []
+    ticker_name = []
+
     for ticker in tickers:
-        # Read the data file for the ticker and generate a data frame for it
+        # Append the name of the pth currently being passed into ticker_name set to be used as column labels
+        ticker_name.append(ticker)
+
+        # Read the data file and convert it into an input for dat_to_df
         dat_file_path = os.path.join(srcdir, ticker + '_prc.dat').lower()
-        result_df = dat_to_df(dat_file_path, src_cols,
-                              src_col_dtypes, src_col_widths)
+
+        # Data file is read into dat_to_df method and a dataframe is generated
+        # Use .loc method to extract 'adjClose' column from dat_to_df function
+        result_df_adjClose = dat_to_df(dat_file_path, src_cols,
+                                       src_col_dtypes, src_col_widths).loc[:, 'adjClose']
+
+        # Append each column that gets passed into adj_close_ticker set
+        adj_close_ticker.append(result_df_adjClose)
+
+    # Use .concat to append different the sets into a dataframe object
+    df_concat_adjClose = pd.concat(adj_close_ticker, axis=1)
+    # Use .columns to rename the dataframe labels to the extracted ticker
+    df_concat_adjClose.columns = ticker_name
+    #This function is working, just need to fix dat_to_df to make it run corrrectly!
+    return df_concat_adjClose
+
+
 
 # ----------------------------------------------------------------------------
 #   Function mk_aret_df
@@ -306,7 +327,7 @@ def mk_aret_df(prc_df):
     -----
 
     The output of this function is a dataframe that looks like this (the
-    contents of the df below are for illustration purposes only and will
+    contents of the df below are for illustration purposes only and w ill
     **not** necessarily represent the actual contents of the dataframe you
     create):
 
