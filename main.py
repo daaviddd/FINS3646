@@ -152,7 +152,7 @@ def dat_to_df(pth,
     # Array of data strings from dat file
     parsed_dates_index = []
     # An index for all of the column lables used in the internal parsed_dat_file array
-    parsed_dat_columns = set([])
+    parsed_dat_columns = []
 
     # Loop through every row in the dat file and parse out the columns in the row
     for row in dat_file_rows:
@@ -178,15 +178,15 @@ def dat_to_df(pth,
                 current_parsed_data.append(col_data)
                 # Append the current column label to the parsed_dat_columns index so we have an index for the current_parsed_data
                 # columns which would not match src_cols array
-                parsed_dat_columns.add(col)
+                if not parsed_dat_columns.__contains__(col):
+                    parsed_dat_columns.append(col)
 
         # Once all columns have been parsed from the dat file add them to the array of string arrays representing the whole dat file
         parsed_dat_file.append(current_parsed_data)
 
     df = pd.DataFrame(parsed_dat_file, pd.DatetimeIndex(parsed_dates_index), parsed_dat_columns)
     df.sort_index(inplace=True)
-    print(dat_file_rows)
-
+    return(df)
 
 # ----------------------------------------------------------------------------
 #   Function mk_prc_df
@@ -291,7 +291,7 @@ def mk_prc_df(
     # Use .columns to rename the dataframe labels to the extracted ticker
     df_concat_adjClose.columns = ticker_name
     #This function is working, just need to fix dat_to_df to make it run corrrectly!
-    return df_concat_adjClose
+    print(df_concat_adjClose)
 
 
 
